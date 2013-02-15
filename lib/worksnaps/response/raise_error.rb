@@ -1,0 +1,33 @@
+require 'faraday'
+=begin
+require 'worksnaps/error/bad_gateway'
+require 'worksnaps/error/bad_request'
+require 'worksnaps/error/forbidden'
+require 'worksnaps/error/gateway_timeout'
+require 'worksnaps/error/internal_server_error'
+require 'worksnaps/error/not_acceptable'
+require 'worksnaps/error/not_found'
+require 'worksnaps/error/service_unavailable'
+require 'worksnaps/error/too_many_requests'
+require 'worksnaps/error/unauthorized'
+require 'worksnaps/error/unprocessable_entity'
+=end
+
+module WorkSnaps
+  module Response
+    class RaiseError < Faraday::Response::Middleware
+
+      def on_complete(env)
+        status_code = env[:status].to_i
+        error_class = @klass.errors[status_code]
+        raise error_class.from_response(env) if error_class
+      end
+
+      def initialize(app, klass)
+        @klass = klass
+        super(app)
+      end
+
+    end
+  end
+end
